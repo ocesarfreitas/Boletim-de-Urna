@@ -1,7 +1,7 @@
 import pandas as pd
 import basedosdados as bd
 import numpy as np
-    
+
 def RA_funs(NM_BAIRRO):
  if NM_BAIRRO == 'AGUAS CLARAS - TAGUATINGA SUL':
   return 'Águas Claras'
@@ -213,7 +213,7 @@ def candidatos(df, UF, ano):
     project_id = 'ivory-volt-354818'
     # Candidatos: nomes
     base = '`basedosdados.br_tse_eleicoes.candidatos`'
-    var = ('ano,sigla_uf,cpf,nome,sequencial,cargo,ocupacao,data_nascimento,idade,instrucao,sigla_uf_nascimento,municipio_nascimento,nome_urna')
+    var = ('ano,sigla_uf,cpf,titulo_eleitoral,nome,sequencial,cargo,ocupacao,data_nascimento,idade,instrucao,sigla_uf_nascimento,municipio_nascimento,nome_urna')
     query = f"SELECT {var} FROM {base} WHERE sigla_uf = {UF} AND ano = {ano}"
     candidatos_nomes = bd.read_sql(query=query,billing_project_id=project_id)
     # Candidatos: eleitos
@@ -231,14 +231,14 @@ def candidatos(df, UF, ano):
     
     if UF == "'DF'":
         # Dados por RA
-        select_col = ['ano', 'sigla_uf','RA','cpf','cargo','nome','nome_urna',
+        select_col = ['ano', 'sigla_uf','RA','cpf','titulo_eleitoral','cargo','nome','nome_urna',
                       'SG_PARTIDO','data_nascimento','instrucao','ocupacao',
                       'sigla_uf_nascimento','municipio_nascimento','resultado','NR_TURNO',
                       'QT_VOTOS', 'QT_VALIDOS']
         candidatos_completo = candidatos_completo[select_col]
         candidatos_completo = candidatos_completo.rename(columns={
-            "ano": "Ano","sigla_uf": "UF","RA":"Região Administrativa",
-            "cpf":"CPF",'cargo':'Cargo','nome':'Nome Completo', 'nome_urna':'Nome Campanha',
+            "ano": "Ano","sigla_uf": "UF","RA":"Região Administrativa","cpf":"CPF",
+            "titulo_eleitoral":"Título Eleitoral",'cargo':'Cargo','nome':'Nome Completo', 'nome_urna':'Nome Campanha',
             'SG_PARTIDO':'Partido','data_nascimento':'Data Nascimento','instrucao':'Instrução',
             'ocupacao':'Ocupação','sigla_uf_nascimento':'UF Nascimento',
             'municipio_nascimento':'Município Nascimento','resultado':'Resultado',
@@ -258,13 +258,14 @@ def candidatos(df, UF, ano):
         cidades['CD_MUNICIPIO'] = cidades['CD_MUNICIPIO'].astype(np.float64)
         candidatos_completo = candidatos_completo.merge(cidades, on="CD_MUNICIPIO", how = 'left')
         # Tratamento 
-        select_col = ['ano', 'sigla_uf','NM_MUNICIPIO','cpf','cargo','nome','nome_urna',
+        select_col = ['ano', 'sigla_uf','NM_MUNICIPIO','cpf','titulo_eleitoral','cargo','nome','nome_urna',
                       'SG_PARTIDO','data_nascimento','instrucao','ocupacao',
                       'sigla_uf_nascimento','municipio_nascimento','resultado','NR_TURNO',
                       'QT_VOTOS', 'QT_VALIDOS']
         candidatos_completo = candidatos_completo[select_col]
         candidatos_completo = candidatos_completo.rename(columns={
-            "ano": "Ano","sigla_uf":"UF",'NM_MUNICIPIO':'Município',"cpf":"CPF",'cargo':'Cargo','nome':'Nome Completo',
+            "ano": "Ano","sigla_uf":"UF",'NM_MUNICIPIO':'Município',"cpf":"CPF",
+            "titulo_eleitoral":"Título Eleitoral",'cargo':'Cargo','nome':'Nome Completo',
             'nome_urna':'Nome Campanha','SG_PARTIDO':'Partido','data_nascimento':'Data Nascimento',
             'instrucao':'Instrução','ocupacao':'Ocupação','sigla_uf_nascimento':'UF Nascimento',
             'municipio_nascimento':'Município Nascimento','resultado':'Resultado',
@@ -295,7 +296,7 @@ def tabela(df, UF, ano):
         # Add a percent number format.
         percent_format = workbook.add_format({'num_format': '0.00%'})
         # Apply the number format to Grade column.
-        distrital.set_column('R:R', None, percent_format)
+        distrital.set_column('S:S', None, percent_format)
         end_0 = len(df_distrital) + 1
         end_1 = len(df_distrital.columns) - 1
         distrital.add_table(0,0,end_0,end_1, {'columns': header_names})
@@ -307,7 +308,7 @@ def tabela(df, UF, ano):
         # Add a percent number format.
         percent_format = workbook.add_format({'num_format': '0.00%'})
         # Apply the number format to Grade column.
-        estadual.set_column('R:R', None, percent_format)
+        estadual.set_column('S:S', None, percent_format)
         end_0 = len(df_estadual) + 1
         end_1 = len(df_estadual.columns) - 1
         estadual.add_table(0,0,end_0,end_1, {'columns': header_names})  
@@ -317,7 +318,7 @@ def tabela(df, UF, ano):
     # Add a percent number format.
     percent_format = workbook.add_format({'num_format': '0.00%'})
     # Apply the number format to Grade column.
-    federal.set_column('R:R', None, percent_format)
+    federal.set_column('S:S', None, percent_format)
     end_0 = len(df_federal) + 1
     end_1 = len(df_federal.columns) - 1
     federal.add_table(0,0,end_0,end_1, {'columns': header_names})
@@ -327,7 +328,7 @@ def tabela(df, UF, ano):
     # Add a percent number format.
     percent_format = workbook.add_format({'num_format': '0.00%'})
     # Apply the number format to Grade column.
-    senado.set_column('R:R', None, percent_format)
+    senado.set_column('S:S', None, percent_format)
     end_0 = len(df_senado) + 1
     end_1 = len(df_senado.columns) - 1
     senado.add_table(0,0,end_0,end_1, {'columns': header_names})
@@ -337,11 +338,111 @@ def tabela(df, UF, ano):
     # Add a percent number format.
     percent_format = workbook.add_format({'num_format': '0.00%'})
     # Apply the number format to Grade column.
-    governo.set_column('R:R', None, percent_format)
+    governo.set_column('S:S', None, percent_format)
     end_0 = len(df_governo) + 1
     end_1 = len(df_governo.columns) - 1
     governo.add_table(0,0,end_0,end_1, {'columns': header_names})
     # Close the Pandas Excel writer and output the Excel file.
     writer.save()
+
+def partidos(df,UF):
+    # Project ID google cloud 
+    project_id = 'ivory-volt-354818'
+    # Candidatos: nomes
+    base = '`basedosdados.br_tse_filiacao_partidaria.microdados`'
+    var = ('titulo_eleitoral,data_filiacao,data_desfiliacao,sigla_uf,sigla_partido')
+    query = f"SELECT {var} FROM {base} WHERE sigla_uf = {UF} AND data_filiacao >= '1980-01-01'"
+    candidatos_filicao = bd.read_sql(query=query,billing_project_id=project_id)
+
+    df_candidatos = df
+
+    lista_eleitos = df_candidatos[['Título Eleitoral','Nome Completo','Nome Campanha','Cargo','CPF']]
+
+    candidatos_filicao = candidatos_filicao.merge(lista_eleitos, left_on='titulo_eleitoral', right_on='Título Eleitoral')
+
+
+    candidatos_filicao = candidatos_filicao.rename(columns={
+        "sigla_partido": "Partido","data_filiacao": "Data Filiação",
+        "data_desfiliacao":"Data Desfiliação"})
+
+    var = ['Cargo','CPF','Nome Completo','Nome Campanha','Partido','Data Filiação','Data Desfiliação']
+    candidatos_filicao = candidatos_filicao[var]
+    candidatos_filicao = candidatos_filicao.drop_duplicates()
     
-##
+    candidatos_filicao["Data Filiação"] = candidatos_filicao["Data Filiação"].astype(str).str.split('-', n=1, expand=True).iloc[:,0].str.extract('(\d{4})')
+    candidatos_filicao["Data Desfiliação"] = candidatos_filicao["Data Desfiliação"].astype(str).str.split('-', n=1, expand=True).iloc[:,0].str.extract('(\d{4})')
+
+    candidatos_filicao["Data Filiação"] = pd.to_numeric(candidatos_filicao["Data Filiação"], errors='coerce', downcast='integer')
+    candidatos_filicao["Data Desfiliação"] = pd.to_numeric(candidatos_filicao["Data Desfiliação"], errors='coerce', downcast='integer')
+
+    return candidatos_filicao   
+
+def partidos2(df, UF):
+    # Project ID google cloud 
+    project_id = 'ivory-volt-354818'
+    
+    # Candidatos: nomes
+    base = '`basedosdados.br_tse_filiacao_partidaria.microdados`'
+    var = ('titulo_eleitoral,data_filiacao,data_desfiliacao,sigla_uf,sigla_partido')
+    query = f"SELECT {var} FROM {base} WHERE sigla_uf = {UF} AND data_filiacao >= '1980-01-01'"
+    candidatos_filicao = bd.read_sql(query=query, billing_project_id=project_id)
+
+    # Select only the necessary columns from df
+    df_candidatos = df[['Título Eleitoral', 'Nome Completo', 'Nome Campanha', 'Cargo', 'CPF']]
+
+    # Merge the two DataFrames and drop duplicates
+    candidatos_filicao = candidatos_filicao.merge(df_candidatos, left_on='titulo_eleitoral', right_on='Título Eleitoral')
+    candidatos_filicao.drop_duplicates(subset=['Cargo', 'CPF', 'Nome Completo', 'Nome Campanha', 'Partido', 'Data Filiação', 'Data Desfiliação'], keep='first', inplace=True)
+
+    # Extract the year from the date columns
+    candidatos_filicao['Data Filiação'] = pd.to_datetime(candidatos_filicao['Data Filiação']).dt.year
+    candidatos_filicao['Data Desfiliação'] = pd.to_datetime(candidatos_filicao['Data Desfiliação']).dt.year
+
+    return candidatos_filicao
+
+
+def tabela_filiacao(df, UF, ano):
+    # Nomes das tabelas
+    header_names = [{'header': df.columns[x]} for x in range(df.shape[1])]
+    # Separando dfs
+    df_estadual = df[df['Cargo'] == "Deputado Estadual"]
+    df_distrital = df[df['Cargo'] == "Deputado Distrital"]
+    df_federal = df[df['Cargo'] == "Deputado Federal"]
+    df_senado = df[df['Cargo'] == "Senador"]
+    df_governo = df[df['Cargo'] == "Governador"]
+    # Criando espaço da tabela
+    writer = pd.ExcelWriter(f'{UF} - Filiação (Eleitos {ano}).xlsx', engine='xlsxwriter')
+    if UF == 'DF':
+        # Criando tabelas
+        df_distrital.to_excel(writer, sheet_name='Distrital', index=False)
+        distrital = writer.sheets['Distrital']
+        end_0 = len(df_distrital) + 1
+        end_1 = len(df_distrital.columns) - 1
+        distrital.add_table(0,0,end_0,end_1, {'columns': header_names})
+    else:
+        # Criando tabelas
+        df_estadual.to_excel(writer, sheet_name='Estadual', index=False)
+        estadual = writer.sheets['Estadual']
+        end_0 = len(df_estadual) + 1
+        end_1 = len(df_estadual.columns) - 1
+        estadual.add_table(0,0,end_0,end_1, {'columns': header_names})  
+    ## Federal 
+    df_federal.to_excel(writer, sheet_name='Federal', index=False)
+    federal = writer.sheets['Federal']
+    end_0 = len(df_federal) + 1
+    end_1 = len(df_federal.columns) - 1
+    federal.add_table(0,0,end_0,end_1, {'columns': header_names})
+    #### Senado
+    df_senado.to_excel(writer, sheet_name='Senado', index=False)
+    senado = writer.sheets['Senado']
+    end_0 = len(df_senado) + 1
+    end_1 = len(df_senado.columns) - 1
+    senado.add_table(0,0,end_0,end_1, {'columns': header_names})
+    #### Governo
+    df_governo.to_excel(writer, sheet_name='Governo', index=False)
+    governo = writer.sheets['Governo']
+    end_0 = len(df_governo) + 1
+    end_1 = len(df_governo.columns) - 1
+    governo.add_table(0,0,end_0,end_1, {'columns': header_names})
+
+    writer.save()
