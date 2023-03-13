@@ -3,7 +3,9 @@ import basedosdados as bd
 import numpy as np
 from funs_tse import extract_data, candidatos, tabela, partidos, tabela_filiacao
 
-lista_uf =['SP']
+lista_uf =['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'ES', 'GO', 'MA', 'MT', 'MS', 
+           'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 
+           'SC', 'SP', 'SE', 'TO', 'DF']
     
 for uf in lista_uf:
     df_eleicao = extract_data(f"{uf}")
